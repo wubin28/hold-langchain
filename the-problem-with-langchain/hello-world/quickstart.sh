@@ -38,6 +38,10 @@ echo "✅ 虚拟环境已激活"
 # 安装依赖
 echo ""
 echo "📍 步骤3: 安装依赖包..."
+
+# 设置环境变量以支持Python 3.13
+export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
+
 echo "正在安装OpenAI库（用于DeepSeek API）..."
 pip install -q openai==0.28.1
 
