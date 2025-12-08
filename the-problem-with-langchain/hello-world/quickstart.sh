@@ -46,7 +46,7 @@ echo "正在安装OpenAI库（用于DeepSeek API）..."
 pip install -q "openai>=1.0.0,<2.0.0"
 
 echo "正在安装LangChain..."
-pip install -q langchain langchain-openai langchain-community
+pip install -q langchain langchain-core langchain-openai langchain-community
 
 echo "正在安装SerpAPI（Agent演示需要）..."
 pip install -q google-search-results

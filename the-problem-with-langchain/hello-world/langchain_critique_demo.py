@@ -33,7 +33,7 @@ print("\n🔴 LangChain方式 (使用多个对象类):")
 print("代码:")
 print("""
 from langchain_openai import ChatOpenAI
-from langchain.schema import HumanMessage
+from langchain_core.messages import HumanMessage
 
 chat = ChatOpenAI(temperature=0)
 result = chat.invoke([HumanMessage(content="Translate: I love programming to French")])
@@ -42,7 +42,7 @@ print(result.content)
 
 try:
     from langchain_openai import ChatOpenAI
-    from langchain.schema import HumanMessage
+    from langchain_core.messages import HumanMessage
     
     print("\n执行结果:")
     start = time.time()
@@ -106,7 +106,7 @@ print("-" * 80)
 print("\n🔴 LangChain方式 (多层嵌套的模板类):")
 print("代码:")
 print("""
-from langchain.prompts.chat import (
+from langchain_core.prompts.chat import (
     ChatPromptTemplate,
     SystemMessagePromptTemplate,
     HumanMessagePromptTemplate,
@@ -127,7 +127,7 @@ print(messages)
 """)
 
 try:
-    from langchain.prompts.chat import (
+    from langchain_core.prompts.chat import (
         ChatPromptTemplate,
         SystemMessagePromptTemplate,
         HumanMessagePromptTemplate,
@@ -195,78 +195,104 @@ print("\n" + "=" * 80)
 print("📌 缺点3: 对话记忆管理过于复杂")
 print("-" * 80)
 
-print("\n🔴 LangChain方式 (多个概念: ConversationBufferMemory, MessagesPlaceholder等):")
+print("\n🔴 LangChain方式 (多个概念: RunnableWithMessageHistory, MessagesPlaceholder等):")
 print("代码:")
 print("""
-from langchain.prompts import (
-    ChatPromptTemplate,
-    MessagesPlaceholder,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate
-)
-from langchain.chains import ConversationChain
-from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
-
-prompt = ChatPromptTemplate.from_messages([
-    SystemMessagePromptTemplate.from_template(
-        "The following is a friendly conversation between a human and an AI."
-    ),
-    MessagesPlaceholder(variable_name="history"),
-    HumanMessagePromptTemplate.from_template("{input}")
-])
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import ChatOpenAI
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.chat_history import InMemoryChatMessageHistory
 
 llm = ChatOpenAI(temperature=0)
-memory = ConversationBufferMemory(return_messages=True)
-conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm)
+store = {}
+def get_session_history(session_id):
+    if session_id not in store:
+        store[session_id] = InMemoryChatMessageHistory()
+    return store[session_id]
 
-response = conversation.predict(input="Hi there!")
-print(response)
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "The following is a friendly conversation between a human and an AI."),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{input}")
+])
+
+chain = prompt | llm
+with_message_history = RunnableWithMessageHistory(
+    chain, get_session_history, input_messages_key="input", history_messages_key="history"
+)
+
+response = with_message_history.invoke(
+    {"input": "Hi there!"}, config={"configurable": {"session_id": "demo"}}
+)
+print(response.content)
 """)
 
 try:
-    from langchain.prompts import (
-        ChatPromptTemplate,
-        MessagesPlaceholder,
-        SystemMessagePromptTemplate,
-        HumanMessagePromptTemplate
-    )
-    from langchain.chains import ConversationChain
+    # 注意：ConversationChain 和 ConversationBufferMemory 在LangChain 1.x中已被移除
+    # 这正好说明了LangChain API的不稳定性！
+    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
     from langchain_openai import ChatOpenAI
-    from langchain.memory import ConversationBufferMemory
+    from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+    from langchain_core.runnables.history import RunnableWithMessageHistory
+    from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
     
     print("\n执行结果:")
     start = time.time()
     
-    prompt = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(
-            "The following is a friendly conversation between a human and an AI. "
-            "The AI is talkative and provides lots of specific details from its context."
-        ),
-        MessagesPlaceholder(variable_name="history"),
-        HumanMessagePromptTemplate.from_template("{input}")
-    ])
-    
+    # 使用新的API方式
     llm = ChatOpenAI(
         temperature=0,
         model="deepseek-chat",
         openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
         openai_api_base="https://api.deepseek.com"
     )
-    memory = ConversationBufferMemory(return_messages=True)
-    conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm)
     
-    response = conversation.predict(input="Hi there!")
+    # 简单的对话历史存储
+    store = {}
+    def get_session_history(session_id: str) -> BaseChatMessageHistory:
+        if session_id not in store:
+            store[session_id] = InMemoryChatMessageHistory()
+        return store[session_id]
+    
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "The following is a friendly conversation between a human and an AI. "
+                   "The AI is talkative and provides lots of specific details from its context."),
+        MessagesPlaceholder(variable_name="history"),
+        ("human", "{input}")
+    ])
+    
+    chain = prompt | llm
+    with_message_history = RunnableWithMessageHistory(
+        chain,
+        get_session_history,
+        input_messages_key="input",
+        history_messages_key="history",
+    )
+    
+    response = with_message_history.invoke(
+        {"input": "Hi there!"},
+        config={"configurable": {"session_id": "demo"}}
+    )
     elapsed = time.time() - start
-    print(f"✅ {response}")
+    print(f"✅ {response.content}")
     print(f"⏱️  耗时: {elapsed:.2f}秒")
     
     # 继续对话
-    response2 = conversation.predict(input="What's 2+2?")
-    print(f"✅ {response2}")
+    response2 = with_message_history.invoke(
+        {"input": "What's 2+2?"},
+        config={"configurable": {"session_id": "demo"}}
+    )
+    print(f"✅ {response2.content}")
+    
+    print("\n💡 额外说明:")
+    print("   注意：LangChain 1.x已经移除了ConversationChain和ConversationBufferMemory")
+    print("   需要使用新的RunnableWithMessageHistory API，这进一步证明了API不稳定的问题！")
     
 except Exception as e:
     print(f"❌ LangChain执行失败: {e}")
+    print("\n💡 说明:")
+    print("   LangChain的API经常变化，ConversationChain在新版本中已被移除")
+    print("   这正好印证了文章的观点 - API不稳定，学习成本高！")
 
 print("\n" + "=" * 80)
 print("\n🟢 DeepSeek官方库方式 (使用简单的列表):")

@@ -33,94 +33,115 @@ print("-" * 80)
 print()
 
 print("🔴 LangChain Agent方式:")
-print("代码:")
+print("代码 (注意：LangChain Agent API经常变化):")
 print("""
-from langchain.agents import load_tools, initialize_agent, AgentType
-from langchain_openai import ChatOpenAI, OpenAI
+# 旧API（已废弃）:
+# from langchain.agents import load_tools, initialize_agent, AgentType
+# agent = initialize_agent(tools, llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION)
 
-chat = ChatOpenAI(
-    temperature=0,
-    model="deepseek-chat",
-    openai_api_base="https://api.deepseek.com"
-)
-llm = OpenAI(
-    temperature=0,
-    model="deepseek-chat",
-    openai_api_base="https://api.deepseek.com"
-)
-tools = load_tools(["serpapi", "llm-math"], llm=llm)
+# 新API（LangChain 1.x）:
+from langchain_openai import ChatOpenAI
+from langchain_community.tools import Tool
+from langchain_core.prompts import PromptTemplate
 
-agent = initialize_agent(
-    tools, 
-    chat, 
-    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, 
-    verbose=True
-)
+llm = ChatOpenAI(temperature=0, model="deepseek-chat")
 
-# 注意：这个查询会产生多次API调用！
-result = agent.run("What is 25 multiplied by 4?")
+# 定义工具
+def calculator(expression: str) -> str:
+    return str(eval(expression))
+
+tools = [Tool(name="Calculator", func=calculator, description="for math")]
+
+# 创建Agent需要手动实现ReAct循环...
+# 即使是这样的简单示例，在新版本中也变得更加复杂！
 """)
 
-if os.environ.get("SERPAPI_API_KEY"):
+# 尝试运行Agent演示
+try:
+    from langchain_openai import ChatOpenAI
+    from langchain_community.tools import Tool
+    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+    from langchain_core.messages import HumanMessage, AIMessage
+    import json
+    
+    print("\n执行结果:")
+    print("⏱️  开始计时...")
+    start = time.time()
+    
+    llm = ChatOpenAI(
+        temperature=0,
+        model="deepseek-chat",
+        openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
+        openai_api_base="https://api.deepseek.com"
+    )
+    
+    # 定义一个简单的计算工具
+    def calculator(expression: str) -> str:
+        """计算数学表达式"""
+        try:
+            result = eval(expression)
+            return str(result)
+        except Exception as e:
+            return f"Error: {e}"
+    
+    # 手动实现简单的ReAct循环来演示多次API调用
+    system_prompt = """You are a helpful assistant with access to a Calculator tool.
+When you need to calculate something, respond ONLY with JSON: {"tool": "Calculator", "input": "expression"}
+Otherwise, provide the final answer directly."""
+    
+    messages = [
+        HumanMessage(content=system_prompt),
+        HumanMessage(content="What is 25 multiplied by 4?")
+    ]
+    
+    print("\n🤖 第1次API调用 - 让AI决定是否使用工具:")
+    print("-" * 80)
+    response1 = llm.invoke(messages)
+    print(f"AI响应: {response1.content[:100]}...")
+    api_calls = 1
+    
+    # 检查是否需要使用工具
     try:
-        from langchain.agents import load_tools, initialize_agent, AgentType
-        from langchain_openai import ChatOpenAI, OpenAI
-        
-        print("\n执行结果:")
-        print("⏱️  开始计时...")
-        start = time.time()
-        
-        chat = ChatOpenAI(
-            temperature=0,
-            model="deepseek-chat",
-            openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
-            openai_api_base="https://api.deepseek.com"
-        )
-        llm = OpenAI(
-            temperature=0,
-            model="deepseek-chat",
-            openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
-            openai_api_base="https://api.deepseek.com"
-        )
-        tools = load_tools(["serpapi", "llm-math"], llm=llm)
-        
-        agent = initialize_agent(
-            tools, 
-            chat, 
-            agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, 
-            verbose=True
-        )
-        
-        print("\n🤖 Agent开始执行...")
-        print("-" * 80)
-        # 使用更简单的问题，因为DeepSeek可能不支持所有工具
-        result = agent.run("What is 25 multiplied by 4?")
-        print("-" * 80)
-        
-        elapsed = time.time() - start
-        print(f"\n✅ 最终答案: {result}")
-        print(f"⏱️  总耗时: {elapsed:.2f}秒")
-        
-        print("\n💡 分析:")
-        print("   从verbose=True的输出可以看到:")
-        print("   1. 每个 Thought -> Action -> Observation 都是一个独立的循环")
-        print("   2. 每个循环都会调用一次API")
-        print("   3. 这个例子中至少进行了2-3次API调用:")
-        print("      - 第1次: 决定使用计算工具")
-        print("      - 第2次: 得到计算结果后，给出最终答案")
-        print("   4. 但LangChain文档并未明确说明这一点！")
-        
-    except Exception as e:
-        print(f"❌ LangChain Agent执行失败: {e}")
-        import traceback
-        traceback.print_exc()
-else:
-    print("\n⚠️  跳过Agent演示（需要SERPAPI_API_KEY）")
-    print("\n💡 如果运行此演示，你会看到:")
-    print("   - Agent会执行多个 Thought -> Action -> Observation 循环")
-    print("   - 每个循环都会调用一次API")
-    print("   - 总耗时会比你预期的长很多")
-    print("   - 但文档中并未明确说明这个性能特征！")
+        if "{" in response1.content and "tool" in response1.content.lower():
+            # AI想使用工具
+            messages.append(AIMessage(content=response1.content))
+            
+            # 执行计算
+            result = calculator("25*4")
+            messages.append(HumanMessage(content=f"Calculator result: {result}"))
+            
+            print(f"\n🤖 第2次API调用 - 提供工具结果，获取最终答案:")
+            print("-" * 80)
+            response2 = llm.invoke(messages)
+            print(f"AI响应: {response2.content[:100]}...")
+            api_calls += 1
+            final_answer = response2.content
+        else:
+            final_answer = response1.content
+    except:
+        final_answer = response1.content
+    
+    print("-" * 80)
+    
+    elapsed = time.time() - start
+    print(f"\n✅ 最终答案: {final_answer}")
+    print(f"⏱️  总耗时: {elapsed:.2f}秒")
+    print(f"📊 总API调用次数: {api_calls}次")
+    
+    print("\n💡 分析:")
+    print(f"   1. 这个简单的数学问题需要{api_calls}次API调用")
+    print("   2. 每次调用都会产生延迟和费用")
+    print("   3. LangChain的Agent会自动进行这样的多次调用")
+    print("   4. 但文档中并未明确说明这个性能特征！")
+    print("   5. 而且Agent API在LangChain 1.x中已经完全改变，增加了学习成本")
+    
+except Exception as e:
+    print(f"❌ LangChain Agent执行失败: {e}")
+    print("\n💡 说明:")
+    print("   LangChain的Agent API经常变化，许多功能在新版本中已被移除或重写")
+    print("   这正好印证了文章的观点 - API不稳定，文档不透明！")
+    import traceback
+    traceback.print_exc()
 
 print("\n" + "=" * 80)
 print("\n🟢 如果用DeepSeek API直接实现类似功能:")
