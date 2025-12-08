@@ -128,7 +128,7 @@ case $choice in
         echo ""
         echo "🚀 运行改进版演示..."
         echo ""
-        python3 langchain_critique_demo_improved.py
+        python3 langchain_critique_demo_deepseek_api_only.py
         ;;
     4)
         echo ""
@@ -139,7 +139,7 @@ case $choice in
         echo "=================================="
         echo "按Enter继续运行改进版演示..."
         read -r
-        python3 langchain_critique_demo_improved.py
+        python3 langchain_critique_demo_deepseek_api_only.py
         echo ""
         echo "=================================="
         echo "按Enter继续运行Agent演示..."
