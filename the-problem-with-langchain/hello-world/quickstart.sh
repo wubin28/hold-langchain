@@ -101,11 +101,14 @@ echo ""
 echo "2. 运行Agent演示 - 缺点4-5对比"
 echo "   （Agent性能问题、实现不透明）"
 echo ""
-echo "3. 运行全部演示"
+echo "3. 运行改进版演示 - DeepSeek官方库优雅解决方案 ⭐️ NEW"
+echo "   （展示如何用DeepSeek官方库优雅解决缺点1-3）"
 echo ""
-echo "4. 退出"
+echo "4. 运行全部演示"
 echo ""
-echo -n "请输入选项 (1-4): "
+echo "5. 退出"
+echo ""
+echo -n "请输入选项 (1-5): "
 read -r choice
 
 case $choice in
@@ -123,16 +126,27 @@ case $choice in
         ;;
     3)
         echo ""
+        echo "🚀 运行改进版演示..."
+        echo ""
+        python3 langchain_critique_demo_improved.py
+        ;;
+    4)
+        echo ""
         echo "🚀 运行全部演示..."
         echo ""
         python3 langchain_critique_demo.py
+        echo ""
+        echo "=================================="
+        echo "按Enter继续运行改进版演示..."
+        read -r
+        python3 langchain_critique_demo_improved.py
         echo ""
         echo "=================================="
         echo "按Enter继续运行Agent演示..."
         read -r
         python3 langchain_agent_performance_demo.py
         ;;
-    4)
+    5)
         echo "👋 再见！"
         exit 0
         ;;
