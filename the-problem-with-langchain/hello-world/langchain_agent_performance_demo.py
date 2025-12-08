@@ -9,9 +9,13 @@ import sys
 import time
 
 # 检查API密钥
-if not os.environ.get("OPENAI_API_KEY"):
-    print("❌ 错误：请设置OPENAI_API_KEY环境变量")
+if not os.environ.get("DEEPSEEK_API_KEY"):
+    print("❌ 错误：请设置DEEPSEEK_API_KEY环境变量")
     sys.exit(1)
+
+# 设置为DeepSeek API
+os.environ["OPENAI_API_KEY"] = os.environ["DEEPSEEK_API_KEY"]
+os.environ["OPENAI_API_BASE"] = "https://api.deepseek.com"
 
 if not os.environ.get("SERPAPI_API_KEY"):
     print("⚠️  警告：未设置SERPAPI_API_KEY环境变量")
@@ -35,8 +39,16 @@ from langchain.agents import load_tools, initialize_agent, AgentType
 from langchain.chat_models import ChatOpenAI
 from langchain.llms import OpenAI
 
-chat = ChatOpenAI(temperature=0)
-llm = OpenAI(temperature=0)
+chat = ChatOpenAI(
+    temperature=0,
+    model_name="deepseek-chat",
+    openai_api_base="https://api.deepseek.com"
+)
+llm = OpenAI(
+    temperature=0,
+    model_name="deepseek-chat",
+    openai_api_base="https://api.deepseek.com"
+)
 tools = load_tools(["serpapi", "llm-math"], llm=llm)
 
 agent = initialize_agent(
@@ -47,7 +59,7 @@ agent = initialize_agent(
 )
 
 # 注意：这个查询会产生多次API调用！
-result = agent.run("Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?")
+result = agent.run("What is 25 multiplied by 4?")
 """)
 
 if os.environ.get("SERPAPI_API_KEY"):
@@ -60,8 +72,16 @@ if os.environ.get("SERPAPI_API_KEY"):
         print("⏱️  开始计时...")
         start = time.time()
         
-        chat = ChatOpenAI(temperature=0)
-        llm = OpenAI(temperature=0)
+        chat = ChatOpenAI(
+            temperature=0,
+            model_name="deepseek-chat",
+            openai_api_base="https://api.deepseek.com"
+        )
+        llm = OpenAI(
+            temperature=0,
+            model_name="deepseek-chat",
+            openai_api_base="https://api.deepseek.com"
+        )
         tools = load_tools(["serpapi", "llm-math"], llm=llm)
         
         agent = initialize_agent(
@@ -73,7 +93,8 @@ if os.environ.get("SERPAPI_API_KEY"):
         
         print("\n🤖 Agent开始执行...")
         print("-" * 80)
-        result = agent.run("Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?")
+        # 使用更简单的问题，因为DeepSeek可能不支持所有工具
+        result = agent.run("What is 25 multiplied by 4?")
         print("-" * 80)
         
         elapsed = time.time() - start
@@ -83,12 +104,10 @@ if os.environ.get("SERPAPI_API_KEY"):
         print("\n💡 分析:")
         print("   从verbose=True的输出可以看到:")
         print("   1. 每个 Thought -> Action -> Observation 都是一个独立的循环")
-        print("   2. 每个循环都会调用一次OpenAI API")
-        print("   3. 这个例子中至少进行了3-4次API调用:")
-        print("      - 第1次: 决定搜索Olivia Wilde的男友")
-        print("      - 第2次: 搜索到Harry Styles后，决定查年龄")
-        print("      - 第3次: 得到年龄后，决定计算29^0.23")
-        print("      - 第4次: 得到计算结果后，给出最终答案")
+        print("   2. 每个循环都会调用一次API")
+        print("   3. 这个例子中至少进行了2-3次API调用:")
+        print("      - 第1次: 决定使用计算工具")
+        print("      - 第2次: 得到计算结果后，给出最终答案")
         print("   4. 但LangChain文档并未明确说明这一点！")
         
     except Exception as e:
@@ -99,16 +118,17 @@ else:
     print("\n⚠️  跳过Agent演示（需要SERPAPI_API_KEY）")
     print("\n💡 如果运行此演示，你会看到:")
     print("   - Agent会执行多个 Thought -> Action -> Observation 循环")
-    print("   - 每个循环都会调用一次OpenAI API")
+    print("   - 每个循环都会调用一次API")
     print("   - 总耗时会比你预期的长很多")
     print("   - 但文档中并未明确说明这个性能特征！")
 
 print("\n" + "=" * 80)
-print("\n🟢 如果用OpenAI官方库实现类似功能:")
+print("\n🟢 如果用DeepSeek API直接实现类似功能:")
 print("代码思路:")
 print("""
 import openai
-import requests
+
+openai.api_base = "https://api.deepseek.com"
 
 # 一次性构造完整的提示词，包含工具描述
 system_prompt = '''
@@ -123,33 +143,24 @@ Otherwise, provide the final answer.
 # 第一次调用：让AI决定需要什么工具
 messages = [
     {"role": "system", "content": system_prompt},
-    {"role": "user", "content": "Who is Olivia Wilde's boyfriend? What is his current age raised to the 0.23 power?"}
+    {"role": "user", "content": "What is 25 multiplied by 4?"}
 ]
 
-response1 = openai.ChatCompletion.create(model="gpt-4", messages=messages)
-# AI可能响应: {"tool": "Search", "input": "Olivia Wilde boyfriend"}
-
-# 执行搜索，获取结果
-
-# 第二次调用：提供搜索结果，让AI继续
-messages.append({"role": "assistant", "content": response1["choices"][0]["message"]["content"]})
-messages.append({"role": "user", "content": "Search result: Harry Styles, 29 years old"})
-
-response2 = openai.ChatCompletion.create(model="gpt-4", messages=messages)
-# AI可能响应: {"tool": "Calculator", "input": "29^0.23"}
+response1 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages)
+# AI可能响应: {"tool": "Calculator", "input": "25 * 4"}
 
 # 执行计算
 
-# 第三次调用：提供计算结果，让AI给出最终答案
-messages.append({"role": "assistant", "content": response2["choices"][0]["message"]["content"]})
-messages.append({"role": "user", "content": "Calculation result: 2.169459462491557"})
+# 第二次调用：提供计算结果，让AI给出最终答案
+messages.append({"role": "assistant", "content": response1["choices"][0]["message"]["content"]})
+messages.append({"role": "user", "content": "Calculation result: 100"})
 
-response3 = openai.ChatCompletion.create(model="gpt-4", messages=messages)
+response2 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages)
 # AI给出最终答案
 """)
 
 print("\n💡 分析:")
-print("   - 使用OpenAI官方库时，你需要手动实现Agent循环")
+print("   - 直接使用API时，你需要手动实现Agent循环")
 print("   - 但你会清楚地知道每次API调用的时机和成本")
 print("   - LangChain隐藏了这些细节，可能导致意外的高成本和慢响应")
 

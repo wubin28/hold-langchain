@@ -38,7 +38,7 @@ echo "✅ 虚拟环境已激活"
 # 安装依赖
 echo ""
 echo "📍 步骤3: 安装依赖包..."
-echo "正在安装OpenAI库..."
+echo "正在安装OpenAI库（用于DeepSeek API）..."
 pip install -q openai==0.28.1
 
 echo "正在安装LangChain..."
@@ -53,19 +53,19 @@ echo "✅ 依赖安装完成"
 echo ""
 echo "📍 步骤4: 检查API密钥..."
 
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo "⚠️  未检测到OPENAI_API_KEY环境变量"
+if [ -z "$DEEPSEEK_API_KEY" ]; then
+    echo "⚠️  未检测到DEEPSEEK_API_KEY环境变量"
     echo ""
-    echo "请输入你的OpenAI API密钥（可以从 https://platform.openai.com/api-keys 获取）："
-    read -s OPENAI_API_KEY
-    export OPENAI_API_KEY
+    echo "请输入你的DeepSeek API密钥（可以从 https://platform.deepseek.com 获取）："
+    read -s DEEPSEEK_API_KEY
+    export DEEPSEEK_API_KEY
     echo ""
     echo "✅ API密钥已设置（当前会话有效）"
     echo ""
     echo "💡 提示：如果想永久保存，请运行："
-    echo "   echo 'export OPENAI_API_KEY=\"$OPENAI_API_KEY\"' >> ~/.zshrc"
+    echo "   echo 'export DEEPSEEK_API_KEY=\"$DEEPSEEK_API_KEY\"' >> ~/.zshrc"
 else
-    echo "✅ 检测到OPENAI_API_KEY"
+    echo "✅ 检测到DEEPSEEK_API_KEY"
 fi
 
 if [ -z "$SERPAPI_API_KEY" ]; then

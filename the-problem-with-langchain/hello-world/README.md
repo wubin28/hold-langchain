@@ -2,7 +2,7 @@
 
 ## 📋 概述
 
-本项目包含两个Python脚本，用于演示2023年那篇批评LangChain文章中提到的所有缺点，并与OpenAI官方库进行对比。
+本项目包含两个Python脚本，用于演示2023年那篇批评LangChain文章中提到的所有缺点，并与DeepSeek API直接调用进行对比。
 
 ### 脚本说明
 
@@ -41,7 +41,7 @@ source venv/bin/activate
 ### 步骤2: 安装依赖
 
 ```bash
-# 安装OpenAI官方库
+# 安装OpenAI库（用于DeepSeek API兼容）
 pip install openai==0.28.1
 
 # 安装LangChain相关库
@@ -58,22 +58,23 @@ pip list | grep -E "openai|langchain"
 ### 步骤3: 配置API密钥
 
 ```bash
-# 设置OpenAI API密钥（必需）
-export OPENAI_API_KEY='your-openai-api-key-here'
+# 设置DeepSeek API密钥（必需）
+# 可以从 https://platform.deepseek.com 注册获取
+export DEEPSEEK_API_KEY='your-deepseek-api-key-here'
 
 # 设置SerpAPI密钥（可选，仅Agent演示需要）
 # 可以从 https://serpapi.com 注册获取免费密钥
 export SERPAPI_API_KEY='your-serpapi-key-here'
 
 # 验证环境变量
-echo $OPENAI_API_KEY
+echo $DEEPSEEK_API_KEY
 ```
 
 **永久设置（可选）：**
 
 ```bash
 # 将API密钥添加到 ~/.zshrc 文件
-echo 'export OPENAI_API_KEY="your-openai-api-key-here"' >> ~/.zshrc
+echo 'export DEEPSEEK_API_KEY="your-deepseek-api-key-here"' >> ~/.zshrc
 echo 'export SERPAPI_API_KEY="your-serpapi-key-here"' >> ~/.zshrc
 
 # 重新加载配置
@@ -106,7 +107,7 @@ python3 langchain_critique_demo.py
 
 **预期输出：**
 - 你会看到每个缺点的详细对比
-- LangChain方式 vs OpenAI官方库方式
+- LangChain方式 vs DeepSeek API直接调用方式
 - 实际运行结果和耗时
 - 详细的分析说明
 
@@ -143,7 +144,7 @@ LangChain Hello World 缺点对比演示
 
 ================================================================================
 
-🟢 OpenAI官方库方式 (简洁直接):
+🟢 DeepSeek API直接调用方式 (简洁直接):
 代码:
 ...
 执行结果:
@@ -221,7 +222,8 @@ export https_proxy=http://127.0.0.1:7890
 
 ## 📚 相关资源
 
-- [OpenAI官方文档](https://platform.openai.com/docs)
+- [DeepSeek官方网站](https://platform.deepseek.com)
+- [DeepSeek API文档](https://platform.deepseek.com/api-docs)
 - [LangChain官方文档](https://python.langchain.com/docs/get_started/introduction)
 - [原文章讨论](https://news.ycombinator.com/item?id=36645575)
 
@@ -235,12 +237,15 @@ export LANGCHAIN_VERBOSE=true
 python3 langchain_critique_demo.py
 ```
 
-### 使用更便宜的模型测试
+### DeepSeek API配置
 
-修改脚本中的模型：
+DeepSeek API兼容OpenAI格式，主要配置：
 ```python
-# 从 gpt-4 改为 gpt-3.5-turbo
-model="gpt-3.5-turbo"
+import openai
+
+openai.api_base = "https://api.deepseek.com"
+openai.api_key = "your-deepseek-api-key"
+model = "deepseek-chat"  # DeepSeek的主要模型
 ```
 
 ### 监控API调用次数
@@ -258,8 +263,8 @@ print(f"API调用次数: {api_call_count}")
 
 完成这些演示后，建议尝试：
 
-1. 用OpenAI官方库实现一个简单的Agent
-2. 对比不同模型（GPT-3.5 vs GPT-4）的性能
+1. 直接使用DeepSeek API实现一个简单的Agent
+2. 对比不同AI提供商（DeepSeek vs OpenAI）的性能
 3. 测试不同prompt策略的效果
 4. 评估其他AI框架（如LlamaIndex、Haystack）
 

@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """
 LangChain Hello World 缺点对比演示
-演示文章中提到的每个缺点，并与OpenAI官方库进行对比
+演示文章中提到的每个缺点，并与DeepSeek API进行对比
 """
 
 import os
 import sys
 import time
 
-# 检查OpenAI API密钥
-if not os.environ.get("OPENAI_API_KEY"):
-    print("❌ 错误：请设置OPENAI_API_KEY环境变量")
-    print("   export OPENAI_API_KEY='your-api-key-here'")
+# 检查DeepSeek API密钥
+if not os.environ.get("DEEPSEEK_API_KEY"):
+    print("❌ 错误：请设置DEEPSEEK_API_KEY环境变量")
+    print("   export DEEPSEEK_API_KEY='your-api-key-here'")
     sys.exit(1)
+
+# 设置为DeepSeek API
+os.environ["OPENAI_API_KEY"] = os.environ["DEEPSEEK_API_KEY"]
+os.environ["OPENAI_API_BASE"] = "https://api.deepseek.com"
 
 print("=" * 80)
 print("LangChain Hello World 缺点对比演示")
@@ -42,7 +46,11 @@ try:
     
     print("\n执行结果:")
     start = time.time()
-    chat = ChatOpenAI(temperature=0)
+    chat = ChatOpenAI(
+        temperature=0,
+        model_name="deepseek-chat",
+        openai_api_base="https://api.deepseek.com"
+    )
     result = chat.predict_messages([HumanMessage(content="Translate this sentence from English to French. I love programming.")])
     elapsed = time.time() - start
     print(f"✅ {result.content}")
@@ -52,28 +60,31 @@ except Exception as e:
     print("提示: 请确保已安装 langchain 和 langchain-openai")
 
 print("\n" + "=" * 80)
-print("\n🟢 OpenAI官方库方式 (简洁直接):")
+print("\n🟢 DeepSeek官方库方式 (简洁直接):")
 print("代码:")
 print("""
 import openai
 
+openai.api_base = "https://api.deepseek.com"
 messages = [{"role": "user", "content": "Translate: I love programming to French"}]
-response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages, temperature=0)
+response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
 print(response["choices"][0]["message"]["content"])
 """)
 
 try:
     import openai
     
+    openai.api_base = "https://api.deepseek.com"
+    
     print("\n执行结果:")
     start = time.time()
     messages = [{"role": "user", "content": "Translate this sentence from English to French. I love programming."}]
-    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages, temperature=0)
+    response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
     elapsed = time.time() - start
     print(f"✅ {response['choices'][0]['message']['content']}")
     print(f"⏱️  耗时: {elapsed:.2f}秒")
 except Exception as e:
-    print(f"❌ OpenAI执行失败: {e}")
+    print(f"❌ DeepSeek执行失败: {e}")
 
 print("\n💡 分析: 两种方式代码量相当，但LangChain引入了额外的对象类，增加了复杂度")
 print()
@@ -229,7 +240,11 @@ try:
         HumanMessagePromptTemplate.from_template("{input}")
     ])
     
-    llm = ChatOpenAI(temperature=0)
+    llm = ChatOpenAI(
+        temperature=0,
+        model_name="deepseek-chat",
+        openai_api_base="https://api.deepseek.com"
+    )
     memory = ConversationBufferMemory(return_messages=True)
     conversation = ConversationChain(memory=memory, prompt=prompt, llm=llm)
     
@@ -246,11 +261,12 @@ except Exception as e:
     print(f"❌ LangChain执行失败: {e}")
 
 print("\n" + "=" * 80)
-print("\n🟢 OpenAI官方库方式 (使用简单的列表):")
+print("\n🟢 DeepSeek官方库方式 (使用简单的列表):")
 print("代码:")
 print("""
 import openai
 
+openai.api_base = "https://api.deepseek.com"
 messages = [{
     "role": "system", 
     "content": "The following is a friendly conversation between a human and an AI."
@@ -259,7 +275,7 @@ messages = [{
 # 第一轮对话
 user_message = "Hi there!"
 messages.append({"role": "user", "content": user_message})
-response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages, temperature=0)
+response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
 assistant_message = response["choices"][0]["message"]["content"]
 messages.append({"role": "assistant", "content": assistant_message})
 print(assistant_message)
@@ -267,7 +283,7 @@ print(assistant_message)
 # 第二轮对话
 user_message2 = "What's 2+2?"
 messages.append({"role": "user", "content": user_message2})
-response2 = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages, temperature=0)
+response2 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
 assistant_message2 = response2["choices"][0]["message"]["content"]
 messages.append({"role": "assistant", "content": assistant_message2})
 print(assistant_message2)
@@ -275,6 +291,8 @@ print(assistant_message2)
 
 try:
     import openai
+    
+    openai.api_base = "https://api.deepseek.com"
     
     print("\n执行结果:")
     start = time.time()
@@ -288,7 +306,7 @@ try:
     # 第一轮对话
     user_message = "Hi there!"
     messages.append({"role": "user", "content": user_message})
-    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages, temperature=0)
+    response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
     assistant_message = response["choices"][0]["message"]["content"]
     messages.append({"role": "assistant", "content": assistant_message})
     elapsed = time.time() - start
@@ -298,7 +316,7 @@ try:
     # 第二轮对话
     user_message2 = "What's 2+2?"
     messages.append({"role": "user", "content": user_message2})
-    response2 = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages, temperature=0)
+    response2 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
     assistant_message2 = response2["choices"][0]["message"]["content"]
     messages.append({"role": "assistant", "content": assistant_message2})
     print(f"✅ {assistant_message2}")
@@ -308,9 +326,9 @@ try:
         print(f"   {i+1}. [{msg['role']}] {msg['content'][:50]}...")
     
 except Exception as e:
-    print(f"❌ OpenAI执行失败: {e}")
+    print(f"❌ DeepSeek执行失败: {e}")
 
-print("\n💡 分析: OpenAI官方库代码更少，逻辑更清晰，能直接看到消息的保存位置和时机")
+print("\n💡 分析: DeepSeek官方库代码更少，逻辑更清晰，能直接看到消息的保存位置和时机")
 print("   LangChain引入了ConversationBufferMemory、MessagesPlaceholder等概念，增加了学习成本")
 
 # ============================================================================
@@ -324,7 +342,7 @@ print("""
 
 1. ❌ LangChain引入了大量抽象层（对象类、模板类、记忆类等）
 2. ❌ 这些抽象没有带来明显的代码优势，反而增加了复杂度
-3. ❌ 很多功能用Python原生特性（如f-strings）或OpenAI官方库就能简单实现
+3. ❌ 很多功能用Python原生特性（如f-strings）或直接使用API就能简单实现
 4. ❌ 文档不够透明，隐藏了重要的性能细节（如Agent每步都调用API）
 5. ❌ 如果quickstart就这么复杂，实际使用会更痛苦
 
