@@ -48,9 +48,7 @@ try:
     start = time.time()
     chat = ChatOpenAI(
         temperature=0,
-        model="deepseek-chat",
-        openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
-        openai_api_base="https://api.deepseek.com"
+        model="deepseek-chat"
     )
     result = chat.invoke([HumanMessage(content="Translate this sentence from English to French. I love programming.")])
     elapsed = time.time() - start
