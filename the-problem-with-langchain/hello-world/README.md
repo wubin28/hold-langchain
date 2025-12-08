@@ -15,7 +15,30 @@
    - 缺点4: 每个Thought/Action/Observation步骤都单独调用API
    - 缺点5: Agent实现不透明
 
-## 🚀 在macOS iTerm2中运行的完整步骤
+## 🚀 快速开始（推荐）
+
+**最简单的方式：使用自动化脚本**
+
+```bash
+# 1. 进入项目目录
+cd the-problem-with-langchain/hello-world
+
+# 2. 运行快速启动脚本
+./quickstart.sh
+```
+
+脚本会自动：
+- ✅ 检查 Python 环境
+- ✅ 创建并激活虚拟环境
+- ✅ 安装所有依赖
+- ✅ 引导你设置 API 密钥
+- ✅ 提供交互式菜单选择要运行的演示
+
+---
+
+## 📖 手动运行步骤（可选）
+
+如果你想手动设置环境，可以按照以下步骤：
 
 ### 步骤1: 环境准备
 
@@ -42,11 +65,11 @@ source venv/bin/activate
 
 ```bash
 # 安装OpenAI库（用于DeepSeek API兼容）
-pip install openai==0.28.1
+# 注意：使用最新版本 1.x
+pip install "openai>=1.0.0,<2.0.0"
 
 # 安装LangChain相关库
-pip install langchain==0.0.350
-pip install langchain-openai==0.0.2
+pip install langchain langchain-openai langchain-community
 
 # 如果要运行Agent演示，还需要安装（可选）
 pip install google-search-results  # SerpAPI的Python库
@@ -54,6 +77,8 @@ pip install google-search-results  # SerpAPI的Python库
 # 验证安装
 pip list | grep -E "openai|langchain"
 ```
+
+**注意：** 新版本的 `openai` 库（>= 1.0.0）API 与旧版本有显著差异，本项目已更新为使用新版 API。
 
 ### 步骤3: 配置API密钥
 
@@ -164,13 +189,35 @@ LangChain Hello World 缺点对比演示
 pip install langchain-openai
 ```
 
-如果还是有问题，修改导入：
+确保使用正确的导入：
 ```python
-# 旧版本
-from langchain.chat_models import ChatOpenAI
-
-# 新版本
+# ✅ 正确的导入方式
 from langchain_openai import ChatOpenAI
+
+# ❌ 已弃用的导入方式
+from langchain.chat_models import ChatOpenAI
+```
+
+### 问题1a: OpenAI API 版本错误
+
+**错误信息：** `You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0`
+
+**解决方案：**
+```bash
+# 确保安装的是 openai >= 1.0.0
+pip install --upgrade "openai>=1.0.0,<2.0.0"
+```
+
+更新代码以使用新版 API：
+```python
+# ❌ 旧版 API (已弃用)
+import openai
+response = openai.ChatCompletion.create(...)
+
+# ✅ 新版 API (正确)
+from openai import OpenAI
+client = OpenAI(api_key="...", base_url="...")
+response = client.chat.completions.create(...)
 ```
 
 ### 问题2: openai.error.RateLimitError
@@ -240,12 +287,30 @@ python3 langchain_critique_demo.py
 ### DeepSeek API配置
 
 DeepSeek API兼容OpenAI格式，主要配置：
+
+**新版 OpenAI API (>= 1.0.0):**
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="your-deepseek-api-key",
+    base_url="https://api.deepseek.com"
+)
+
+# 调用示例
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[{"role": "user", "content": "Hello"}]
+)
+```
+
+**旧版 API (已弃用):**
 ```python
 import openai
 
 openai.api_base = "https://api.deepseek.com"
 openai.api_key = "your-deepseek-api-key"
-model = "deepseek-chat"  # DeepSeek的主要模型
+model = "deepseek-chat"
 ```
 
 ### 监控API调用次数

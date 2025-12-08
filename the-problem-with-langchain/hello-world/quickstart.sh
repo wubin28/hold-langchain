@@ -43,10 +43,10 @@ echo "📍 步骤3: 安装依赖包..."
 export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
 
 echo "正在安装OpenAI库（用于DeepSeek API）..."
-pip install -q openai==0.28.1
+pip install -q "openai>=1.0.0,<2.0.0"
 
 echo "正在安装LangChain..."
-pip install -q langchain==0.0.350 langchain-openai==0.0.2
+pip install -q langchain langchain-openai langchain-community
 
 echo "正在安装SerpAPI（Agent演示需要）..."
 pip install -q google-search-results
@@ -66,8 +66,6 @@ if [ -z "$DEEPSEEK_API_KEY" ]; then
     echo ""
     echo "✅ API密钥已设置（当前会话有效）"
     echo ""
-    echo "💡 提示：如果想永久保存，请运行："
-    echo "   echo 'export DEEPSEEK_API_KEY=\"$DEEPSEEK_API_KEY\"' >> ~/.zshrc"
 else
     echo "✅ 检测到DEEPSEEK_API_KEY"
 fi

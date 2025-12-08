@@ -32,26 +32,27 @@ print("-" * 80)
 print("\n🔴 LangChain方式 (使用多个对象类):")
 print("代码:")
 print("""
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage
 
 chat = ChatOpenAI(temperature=0)
-result = chat.predict_messages([HumanMessage(content="Translate: I love programming to French")])
+result = chat.invoke([HumanMessage(content="Translate: I love programming to French")])
 print(result.content)
 """)
 
 try:
-    from langchain.chat_models import ChatOpenAI
+    from langchain_openai import ChatOpenAI
     from langchain.schema import HumanMessage
     
     print("\n执行结果:")
     start = time.time()
     chat = ChatOpenAI(
         temperature=0,
-        model_name="deepseek-chat",
+        model="deepseek-chat",
+        openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
         openai_api_base="https://api.deepseek.com"
     )
-    result = chat.predict_messages([HumanMessage(content="Translate this sentence from English to French. I love programming.")])
+    result = chat.invoke([HumanMessage(content="Translate this sentence from English to French. I love programming.")])
     elapsed = time.time() - start
     print(f"✅ {result.content}")
     print(f"⏱️  耗时: {elapsed:.2f}秒")
@@ -63,25 +64,31 @@ print("\n" + "=" * 80)
 print("\n🟢 DeepSeek官方库方式 (简洁直接):")
 print("代码:")
 print("""
-import openai
+from openai import OpenAI
 
-openai.api_base = "https://api.deepseek.com"
+client = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
 messages = [{"role": "user", "content": "Translate: I love programming to French"}]
-response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
-print(response["choices"][0]["message"]["content"])
+response = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+print(response.choices[0].message.content)
 """)
 
 try:
-    import openai
+    from openai import OpenAI
     
-    openai.api_base = "https://api.deepseek.com"
+    client = OpenAI(
+        api_key=os.environ.get("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com"
+    )
     
     print("\n执行结果:")
     start = time.time()
     messages = [{"role": "user", "content": "Translate this sentence from English to French. I love programming."}]
-    response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
+    response = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
     elapsed = time.time() - start
-    print(f"✅ {response['choices'][0]['message']['content']}")
+    print(f"✅ {response.choices[0].message.content}")
     print(f"⏱️  耗时: {elapsed:.2f}秒")
 except Exception as e:
     print(f"❌ DeepSeek执行失败: {e}")
@@ -225,7 +232,7 @@ try:
         HumanMessagePromptTemplate
     )
     from langchain.chains import ConversationChain
-    from langchain.chat_models import ChatOpenAI
+    from langchain_openai import ChatOpenAI
     from langchain.memory import ConversationBufferMemory
     
     print("\n执行结果:")
@@ -242,7 +249,8 @@ try:
     
     llm = ChatOpenAI(
         temperature=0,
-        model_name="deepseek-chat",
+        model="deepseek-chat",
+        openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
         openai_api_base="https://api.deepseek.com"
     )
     memory = ConversationBufferMemory(return_messages=True)
@@ -264,9 +272,12 @@ print("\n" + "=" * 80)
 print("\n🟢 DeepSeek官方库方式 (使用简单的列表):")
 print("代码:")
 print("""
-import openai
+from openai import OpenAI
 
-openai.api_base = "https://api.deepseek.com"
+client = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
 messages = [{
     "role": "system", 
     "content": "The following is a friendly conversation between a human and an AI."
@@ -275,24 +286,27 @@ messages = [{
 # 第一轮对话
 user_message = "Hi there!"
 messages.append({"role": "user", "content": user_message})
-response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
-assistant_message = response["choices"][0]["message"]["content"]
+response = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+assistant_message = response.choices[0].message.content
 messages.append({"role": "assistant", "content": assistant_message})
 print(assistant_message)
 
 # 第二轮对话
 user_message2 = "What's 2+2?"
 messages.append({"role": "user", "content": user_message2})
-response2 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
-assistant_message2 = response2["choices"][0]["message"]["content"]
+response2 = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+assistant_message2 = response2.choices[0].message.content
 messages.append({"role": "assistant", "content": assistant_message2})
 print(assistant_message2)
 """)
 
 try:
-    import openai
+    from openai import OpenAI
     
-    openai.api_base = "https://api.deepseek.com"
+    client = OpenAI(
+        api_key=os.environ.get("DEEPSEEK_API_KEY"),
+        base_url="https://api.deepseek.com"
+    )
     
     print("\n执行结果:")
     start = time.time()
@@ -306,8 +320,8 @@ try:
     # 第一轮对话
     user_message = "Hi there!"
     messages.append({"role": "user", "content": user_message})
-    response = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
-    assistant_message = response["choices"][0]["message"]["content"]
+    response = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+    assistant_message = response.choices[0].message.content
     messages.append({"role": "assistant", "content": assistant_message})
     elapsed = time.time() - start
     print(f"✅ {assistant_message}")
@@ -316,8 +330,8 @@ try:
     # 第二轮对话
     user_message2 = "What's 2+2?"
     messages.append({"role": "user", "content": user_message2})
-    response2 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages, temperature=0)
-    assistant_message2 = response2["choices"][0]["message"]["content"]
+    response2 = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+    assistant_message2 = response2.choices[0].message.content
     messages.append({"role": "assistant", "content": assistant_message2})
     print(f"✅ {assistant_message2}")
     

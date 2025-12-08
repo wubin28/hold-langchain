@@ -36,17 +36,16 @@ print("🔴 LangChain Agent方式:")
 print("代码:")
 print("""
 from langchain.agents import load_tools, initialize_agent, AgentType
-from langchain.chat_models import ChatOpenAI
-from langchain.llms import OpenAI
+from langchain_openai import ChatOpenAI, OpenAI
 
 chat = ChatOpenAI(
     temperature=0,
-    model_name="deepseek-chat",
+    model="deepseek-chat",
     openai_api_base="https://api.deepseek.com"
 )
 llm = OpenAI(
     temperature=0,
-    model_name="deepseek-chat",
+    model="deepseek-chat",
     openai_api_base="https://api.deepseek.com"
 )
 tools = load_tools(["serpapi", "llm-math"], llm=llm)
@@ -65,8 +64,7 @@ result = agent.run("What is 25 multiplied by 4?")
 if os.environ.get("SERPAPI_API_KEY"):
     try:
         from langchain.agents import load_tools, initialize_agent, AgentType
-        from langchain.chat_models import ChatOpenAI
-        from langchain.llms import OpenAI
+        from langchain_openai import ChatOpenAI, OpenAI
         
         print("\n执行结果:")
         print("⏱️  开始计时...")
@@ -74,12 +72,14 @@ if os.environ.get("SERPAPI_API_KEY"):
         
         chat = ChatOpenAI(
             temperature=0,
-            model_name="deepseek-chat",
+            model="deepseek-chat",
+            openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
             openai_api_base="https://api.deepseek.com"
         )
         llm = OpenAI(
             temperature=0,
-            model_name="deepseek-chat",
+            model="deepseek-chat",
+            openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
             openai_api_base="https://api.deepseek.com"
         )
         tools = load_tools(["serpapi", "llm-math"], llm=llm)
@@ -126,9 +126,12 @@ print("\n" + "=" * 80)
 print("\n🟢 如果用DeepSeek API直接实现类似功能:")
 print("代码思路:")
 print("""
-import openai
+from openai import OpenAI
 
-openai.api_base = "https://api.deepseek.com"
+client = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
 
 # 一次性构造完整的提示词，包含工具描述
 system_prompt = '''
@@ -146,16 +149,16 @@ messages = [
     {"role": "user", "content": "What is 25 multiplied by 4?"}
 ]
 
-response1 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages)
+response1 = client.chat.completions.create(model="deepseek-chat", messages=messages)
 # AI可能响应: {"tool": "Calculator", "input": "25 * 4"}
 
 # 执行计算
 
 # 第二次调用：提供计算结果，让AI给出最终答案
-messages.append({"role": "assistant", "content": response1["choices"][0]["message"]["content"]})
+messages.append({"role": "assistant", "content": response1.choices[0].message.content})
 messages.append({"role": "user", "content": "Calculation result: 100"})
 
-response2 = openai.ChatCompletion.create(model="deepseek-chat", messages=messages)
+response2 = client.chat.completions.create(model="deepseek-chat", messages=messages)
 # AI给出最终答案
 """)
 
