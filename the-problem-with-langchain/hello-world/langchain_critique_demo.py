@@ -7,6 +7,7 @@ LangChain Hello World 缺点对比演示
 import os
 import sys
 import time
+from typing import cast, Any
 
 # 检查DeepSeek API密钥
 if not os.environ.get("DEEPSEEK_API_KEY"):
@@ -83,8 +84,8 @@ try:
     
     print("\n执行结果:")
     start = time.time()
-    messages = [{"role": "user", "content": "Translate this sentence from English to French. I love programming."}]
-    response = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+    messages: list[dict[str, Any]] = [{"role": "user", "content": "Translate this sentence from English to French. I love programming."}]
+    response = client.chat.completions.create(model="deepseek-chat", messages=cast(Any, messages), temperature=0)
     elapsed = time.time() - start
     print(f"✅ {response.choices[0].message.content}")
     print(f"⏱️  耗时: {elapsed:.2f}秒")
@@ -336,7 +337,7 @@ try:
     print("\n执行结果:")
     start = time.time()
     
-    messages = [{
+    messages: list[dict[str, Any]] = [{
         "role": "system", 
         "content": "The following is a friendly conversation between a human and an AI. "
                    "The AI is talkative and provides lots of specific details from its context."
@@ -345,7 +346,7 @@ try:
     # 第一轮对话
     user_message = "Hi there!"
     messages.append({"role": "user", "content": user_message})
-    response = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+    response = client.chat.completions.create(model="deepseek-chat", messages=cast(Any, messages), temperature=0)
     assistant_message = response.choices[0].message.content
     messages.append({"role": "assistant", "content": assistant_message})
     elapsed = time.time() - start
@@ -355,7 +356,7 @@ try:
     # 第二轮对话
     user_message2 = "What's 2+2?"
     messages.append({"role": "user", "content": user_message2})
-    response2 = client.chat.completions.create(model="deepseek-chat", messages=messages, temperature=0)
+    response2 = client.chat.completions.create(model="deepseek-chat", messages=cast(Any, messages), temperature=0)
     assistant_message2 = response2.choices[0].message.content
     messages.append({"role": "assistant", "content": assistant_message2})
     print(f"✅ {assistant_message2}")
