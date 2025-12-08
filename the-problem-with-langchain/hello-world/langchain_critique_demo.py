@@ -199,6 +199,7 @@ print("""
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.runnables import RunnableConfig
 from langchain_core.chat_history import InMemoryChatMessageHistory
 
 llm = ChatOpenAI(temperature=0)
@@ -232,6 +233,7 @@ try:
     from langchain_openai import ChatOpenAI
     from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
     from langchain_core.runnables.history import RunnableWithMessageHistory
+    from langchain_core.runnables import RunnableConfig
     from langchain_core.chat_history import BaseChatMessageHistory, InMemoryChatMessageHistory
     
     print("\n执行结果:")
@@ -241,8 +243,6 @@ try:
     llm = ChatOpenAI(
         temperature=0,
         model="deepseek-chat",
-        openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
-        openai_api_base="https://api.deepseek.com"
     )
     
     # 简单的对话历史存储
@@ -267,9 +267,10 @@ try:
         history_messages_key="history",
     )
     
+    config: RunnableConfig = {"configurable": {"session_id": "demo"}}
     response = with_message_history.invoke(
         {"input": "Hi there!"},
-        config={"configurable": {"session_id": "demo"}}
+        config=config
     )
     elapsed = time.time() - start
     print(f"✅ {response.content}")
@@ -278,7 +279,7 @@ try:
     # 继续对话
     response2 = with_message_history.invoke(
         {"input": "What's 2+2?"},
-        config={"configurable": {"session_id": "demo"}}
+        config=config
     )
     print(f"✅ {response2.content}")
     
