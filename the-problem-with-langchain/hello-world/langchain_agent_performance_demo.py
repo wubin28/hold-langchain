@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 """
-LangChain Agent 性能问题演示
-演示文章中提到的缺点4: 每个Thought/Action/Observation步骤都单独调用API，导致性能问题
+LangChain Agent 性能问题演示（针对旧版API的批评）
+
+注意：本演示基于对旧版 LangChain (0.x) Agent API 的批评。
+旧版API（如 initialize_agent, AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION）已在 LangChain 1.x 中废弃。
+
+原批评的核心问题：
+- 旧版 agent.run() 会触发多次隐藏的 API 调用，文档未明确说明
+- 用户难以预测成本和性能影响
+
+LangChain 1.x 的变化：
+- 旧的高层 Agent API 已废弃
+- 现在需要手动实现 Agent 循环或使用 LangGraph
+- 这使得 API 调用变得更透明（如本代码中的两次 llm.invoke()）
+- 但也意味着失去了原本的"简化"优势
+
+本演示手动实现简化版 ReAct 循环，说明 Agent 模式的多次 API 调用特性。
 """
 
 import os
@@ -28,12 +42,13 @@ print("LangChain Agent 性能问题演示")
 print("=" * 80)
 print()
 
-print("📌 缺点4: Agent每个步骤都单独调用API，但文档未明确说明")
+print("📌 原批评：Agent每个步骤都单独调用API，但文档未明确说明")
+print("   (此批评主要针对旧版 LangChain 0.x 的 Agent API)")
 print("-" * 80)
 print()
 
-print("🔴 LangChain Agent方式:")
-print("代码 (注意：LangChain Agent API经常变化):")
+print("🔴 旧版 LangChain Agent 的问题:")
+print("代码演变 (展示API变化及透明度问题):")
 print("""
 # 旧API（已废弃）:
 # from langchain.agents import load_tools, initialize_agent, AgentType
@@ -131,15 +146,16 @@ Otherwise, provide the final answer directly."""
     print("\n💡 分析:")
     print(f"   1. 这个简单的数学问题需要{api_calls}次API调用")
     print("   2. 每次调用都会产生延迟和费用")
-    print("   3. LangChain的Agent会自动进行这样的多次调用")
-    print("   4. 但文档中并未明确说明这个性能特征！")
-    print("   5. 而且Agent API在LangChain 1.x中已经完全改变，增加了学习成本")
+    print("   3. 在本演示中，两次 llm.invoke() 调用是明确可见的（透明）")
+    print("   4. 但在旧版 LangChain 中，agent.run() 会隐藏这些调用")
+    print("   5. LangChain 1.x 废弃了旧的 Agent API，现在需要手动实现")
+    print("   6. 这使得调用更透明，但也失去了原本的简化优势")
     
 except Exception as e:
-    print(f"❌ LangChain Agent执行失败: {e}")
+    print(f"❌ 演示执行失败: {e}")
     print("\n💡 说明:")
-    print("   LangChain的Agent API经常变化，许多功能在新版本中已被移除或重写")
-    print("   这正好印证了文章的观点 - API不稳定，文档不透明！")
+    print("   本演示手动实现了简化版 ReAct 循环")
+    print("   旧版 LangChain Agent API 已废弃，正好印证了 API 不稳定的批评")
     import traceback
     traceback.print_exc()
 
@@ -186,23 +202,32 @@ response2 = client.chat.completions.create(model="deepseek-chat", messages=messa
 print("\n💡 分析:")
 print("   - 直接使用API时，你需要手动实现Agent循环")
 print("   - 但你会清楚地知道每次API调用的时机和成本")
-print("   - LangChain隐藏了这些细节，可能导致意外的高成本和慢响应")
+print("   - 旧版 LangChain 隐藏了这些细节，可能导致意外的高成本和慢响应")
+print("   - LangChain 1.x 现在也需要类似的手动实现，但增加了额外的抽象层")
 
 print("\n" + "=" * 80)
 print("📊 关键问题总结")
 print("=" * 80)
 print("""
-❌ LangChain的问题:
-   1. Agent的每个推理步骤都会调用API
+❌ 旧版 LangChain (0.x) Agent 的问题:
+   1. agent.run() 隐藏了多次 API 调用（不透明）
    2. 一个简单查询可能产生3-5次API调用
    3. 文档中没有明确说明这一点
    4. 用户可能会惊讶于高昂的API费用和长时间的响应延迟
    5. AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION 这样的命名很晦涩
 
+🔄 LangChain 1.x 的变化:
+   1. 旧的高层 Agent API (initialize_agent) 已废弃
+   2. 现在需要手动实现 Agent 循环或使用 LangGraph
+   3. API 调用变得更透明（如本演示中的明确 llm.invoke()）
+   4. 但这也意味着失去了原本的"开箱即用"简化优势
+   5. 开发者需要写更多代码来实现相同功能
+
 ✅ 透明度的重要性:
    - 开发者应该明确知道何时、为何调用API
    - 成本和性能影响应该是可预测的
    - 抽象不应该隐藏关键的性能特征
+   - LangChain 1.x 在这方面有所改进，但代价是复杂度增加
 """)
 
 print("\n" + "=" * 80)
