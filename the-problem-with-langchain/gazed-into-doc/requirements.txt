@@ -1,0 +1,16 @@
+# LangChain v1.0 and related packages
+langchain==0.3.11
+langchain-openai==0.2.14
+langchain-community==0.3.11
+
+# OpenAI
+openai>=1.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Optional: For vector store examples
+sentence-transformers>=2.2.0
+datasets>=2.14.0
+faiss-cpu>=1.7.4
+
