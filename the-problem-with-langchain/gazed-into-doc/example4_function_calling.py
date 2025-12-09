@@ -1,13 +1,10 @@
 import os
 from typing import List
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import StructuredTool
 from langchain_core.pydantic_v1 import BaseModel, Field
-
-load_dotenv()
 
 # 定义工具输入模型
 class RecipeSearchInput(BaseModel):
@@ -55,7 +52,12 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 # 使用支持function calling的模型
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0,
+    openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    openai_api_base="https://api.deepseek.com"
+)
 
 # ✅ 使用OpenAI Functions agent（更可靠的结构化输出）
 agent = create_openai_functions_agent(llm, tools, prompt)
@@ -68,9 +70,9 @@ agent_executor = AgentExecutor(
 )
 
 print("=" * 80)
-print("Testing OpenAI Function Calling in LangChain v1.0")
+print("Testing DeepSeek Function Calling in LangChain v1.0")
 print("=" * 80)
-print("This approach uses OpenAI's native function calling for reliable structured output\n")
+print("This approach uses DeepSeek's native function calling for reliable structured output\n")
 
 result = agent_executor.invoke({"input": "Find me dessert recipes"})
 

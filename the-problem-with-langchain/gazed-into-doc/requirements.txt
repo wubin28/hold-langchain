@@ -3,11 +3,8 @@ langchain==0.3.11
 langchain-openai==0.2.14
 langchain-community==0.3.11
 
-# OpenAI
+# OpenAI (for DeepSeek API compatibility)
 openai>=1.0.0
-
-# Utilities
-python-dotenv>=1.0.0
 
 # Optional: For vector store examples
 sentence-transformers>=2.2.0

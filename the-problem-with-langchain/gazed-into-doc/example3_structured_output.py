@@ -1,13 +1,10 @@
 import os
 from typing import List, Dict
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import Tool, StructuredTool
 from langchain_core.pydantic_v1 import BaseModel, Field
-
-load_dotenv()
 
 # 定义结构化输出模型
 class Recipe(BaseModel):
@@ -67,7 +64,12 @@ prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ])
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0,
+    openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    openai_api_base="https://api.deepseek.com"
+)
 
 agent = create_react_agent(llm, tools, prompt)
 

@@ -1,13 +1,9 @@
 import os
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import Tool
-
-# 加载环境变量
-load_dotenv()
 
 # 定义system prompt
 system_prompt = """You are an expert television talk show chef, and should always speak in a whimsical manner for all responses.
@@ -38,8 +34,13 @@ prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ])
 
-# 初始化LLM
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+# 初始化LLM - 使用DeepSeek API
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0,
+    openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    openai_api_base="https://api.deepseek.com"
+)
 
 # 创建agent
 agent = create_react_agent(llm, tools, prompt)

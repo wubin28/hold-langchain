@@ -54,20 +54,17 @@ echo "✅ 依赖安装完成"
 echo ""
 echo "📍 步骤4: 检查API密钥..."
 
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo "⚠️  未检测到OPENAI_API_KEY环境变量"
+if [ -z "$DEEPSEEK_API_KEY" ]; then
+    echo "⚠️  未检测到DEEPSEEK_API_KEY环境变量"
     echo ""
-    echo "请输入你的OpenAI API密钥（可以从 https://platform.openai.com/api-keys 获取）："
-    read -s OPENAI_API_KEY
-    export OPENAI_API_KEY
+    echo "请输入你的DeepSeek API密钥（可以从 https://platform.deepseek.com/api_keys 获取）："
+    read -s DEEPSEEK_API_KEY
+    export DEEPSEEK_API_KEY
     echo ""
     echo "✅ API密钥已设置（当前会话有效）"
     echo ""
-    echo "💡 提示：你也可以创建.env文件来永久保存API密钥："
-    echo "   echo 'OPENAI_API_KEY=your-key-here' > .env"
-    echo ""
 else
-    echo "✅ 检测到OPENAI_API_KEY"
+    echo "✅ 检测到DEEPSEEK_API_KEY"
 fi
 
 # 显示菜单
@@ -85,7 +82,7 @@ echo ""
 echo "3. 示例3 - 结构化输出"
 echo "   （使用Pydantic模型定义输出格式）"
 echo ""
-echo "4. 示例4 - OpenAI Function Calling"
+echo "4. 示例4 - DeepSeek Function Calling"
 echo "   （展示函数调用能力）"
 echo ""
 echo "5. 示例5 - 完整Recipe Bot"
@@ -119,7 +116,7 @@ case $choice in
         ;;
     4)
         echo ""
-        echo "🚀 运行示例4 - OpenAI Function Calling..."
+        echo "🚀 运行示例4 - DeepSeek Function Calling..."
         echo ""
         python3 example4_function_calling.py
         ;;
@@ -161,7 +158,7 @@ case $choice in
         read -r
         echo ""
         echo "=================================="
-        echo "示例4 - OpenAI Function Calling"
+        echo "示例4 - DeepSeek Function Calling"
         echo "=================================="
         python3 example4_function_calling.py
         echo ""

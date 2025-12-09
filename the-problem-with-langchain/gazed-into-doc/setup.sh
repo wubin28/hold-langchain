@@ -31,32 +31,20 @@ echo ""
 echo "Installing requirements..."
 pip install -r requirements.txt
 
-# Create .env file if it doesn't exist
-if [ ! -f .env ]; then
-    echo ""
-    echo "Creating .env file..."
-    cat > .env << 'EOF'
-# OpenAI API Key
-# Get your API key from: https://platform.openai.com/api-keys
-OPENAI_API_KEY=sk-your-openai-api-key-here
-EOF
-    echo "✅ .env file created"
-    echo "⚠️  Please edit .env and add your OpenAI API key"
-else
-    echo ""
-    echo "✅ .env file already exists"
-fi
-
 echo ""
 echo "=================================="
 echo "Setup Complete!"
 echo "=================================="
 echo ""
 echo "Next steps:"
-echo "1. Edit .env and add your OPENAI_API_KEY"
-echo "2. Activate the virtual environment:"
+echo "1. Activate the virtual environment:"
 echo "   source venv/bin/activate"
-echo "3. Run any example:"
+echo "2. Set your DeepSeek API key (for current session only):"
+echo "   export DEEPSEEK_API_KEY='your-api-key'"
+echo "   Or use the quickstart.sh script which will prompt for it securely"
+echo "3. Run examples using the quickstart script:"
+echo "   ./quickstart.sh"
+echo "   Or run any example directly:"
 echo "   python example1_system_prompt_fixed.py"
 echo ""
 

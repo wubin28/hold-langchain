@@ -1,12 +1,9 @@
 import os
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import Tool
-
-load_dotenv()
 
 # 使用一个可能导致非JSON输出的system prompt
 system_prompt = """You are a whimsical chef who LOVES to use exclamation marks and emoji!!!  🎉🍕
@@ -35,7 +32,12 @@ prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ])
 
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.7)  # 更高的temperature测试稳定性
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0.7,
+    openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    openai_api_base="https://api.deepseek.com"
+)  # 更高的temperature测试稳定性
 
 agent = create_react_agent(llm, tools, prompt)
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)

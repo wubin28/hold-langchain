@@ -9,7 +9,7 @@
 - `example1_system_prompt_fixed.py` - System Prompt修复示例
 - `example2_json_parsing_robust.py` - JSON解析稳定性示例
 - `example3_structured_output.py` - 结构化输出示例
-- `example4_function_calling.py` - OpenAI Function Calling示例
+- `example4_function_calling.py` - DeepSeek Function Calling示例
 - `example5_complete_recipe_bot.py` - 完整Recipe Bot示例
 
 ## 快速开始
@@ -27,18 +27,22 @@ source venv/bin/activate  # macOS/Linux
 pip install -r requirements.txt
 ```
 
-### 3. 配置API Key
+### 3. 运行示例
 
-复制 `.env.example` 为 `.env` 并填入你的OpenAI API Key:
+**推荐方式：使用快速启动脚本**
 
 ```bash
-cp .env.example .env
-# 编辑 .env 文件，填入你的 OPENAI_API_KEY
+./quickstart.sh
 ```
 
-### 4. 运行示例
+脚本会提示你输入DeepSeek API Key（输入时不显示在屏幕上，确保安全）。
+
+**或者手动设置环境变量并运行：**
 
 ```bash
+# 设置DeepSeek API Key（仅当前会话有效）
+export DEEPSEEK_API_KEY='your-api-key-here'
+
 # 示例1: System Prompt修复
 python example1_system_prompt_fixed.py
 
@@ -73,7 +77,15 @@ python example5_complete_recipe_bot.py
 
 - Python 3.8+
 - LangChain 0.3.11
-- OpenAI API (gpt-3.5-turbo 或 gpt-4)
+- DeepSeek API (deepseek-chat)
+
+## API Key 安全
+
+本项目已配置为安全处理API密钥：
+- 不会将API密钥保存到文件中
+- 不会在终端输出API密钥
+- 仅支持通过环境变量或安全的终端输入方式提供API密钥
+- 获取DeepSeek API Key: https://platform.deepseek.com/api_keys
 
 ## License
 

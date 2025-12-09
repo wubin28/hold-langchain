@@ -1,15 +1,12 @@
 import os
 import re
 from typing import List, Dict, Any
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain.memory import ConversationBufferMemory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import StructuredTool
 from langchain_core.pydantic_v1 import BaseModel, Field
-
-load_dotenv()
 
 # 模拟recipe数据库
 RECIPE_DB = {
@@ -81,7 +78,12 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 # 初始化组件
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.7)  # 稍高的temperature增加趣味性
+llm = ChatOpenAI(
+    model="deepseek-chat",
+    temperature=0.7,
+    openai_api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    openai_api_base="https://api.deepseek.com"
+)  # 稍高的temperature增加趣味性
 agent = create_openai_functions_agent(llm, tools, prompt)
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
