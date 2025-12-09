@@ -27,8 +27,9 @@ tools = [
 ]
 
 # LangChain v1.0 的正确方式：使用ChatPromptTemplate with system message
+# ReAct agent 需要包含 tools 和 tool_names 变量
 prompt = ChatPromptTemplate.from_messages([
-    ("system", system_prompt),
+    ("system", system_prompt + "\n\nYou have access to the following tools:\n\n{tools}\n\nUse the following format:\n\nQuestion: the input question you must answer\nThought: you should always think about what to do\nAction: the action to take, should be one of [{tool_names}]\nAction Input: the input to the action\nObservation: the result of the action\n... (this Thought/Action/Action Input/Observation can repeat N times)\nThought: I now know the final answer\nFinal Answer: the final answer to the original input question"),
     MessagesPlaceholder(variable_name="chat_history", optional=True),
     ("human", "{input}"),
     MessagesPlaceholder(variable_name="agent_scratchpad"),
